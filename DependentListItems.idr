@@ -2,7 +2,11 @@ data Composition : (a -> a -> Type) -> a -> a -> Type where
   Composition.Nil : Composition r x x
   Composition.(::) : r x y -> Composition r y z -> Composition r x z
 
-data Ty = Key | FilePath | FileContents | NoInput
+data Ty = Key
+        | FilePath
+        | FileContents
+        | RowIter
+        | NoInput
 
 data Plugin : (inp, outp : Ty) -> Type where
   MkPlugin : (inp, outp : Ty) -> Plugin inp outp
@@ -26,6 +30,16 @@ plugins = [ MkPlugin NoInput Key
           , MkPlugin Key FileContents
           ]
 
+data Plugin2 : (inp, outp : ty) -> Type where
+     InitMsg : (inp, outp : Ty) -> Plugin2 inp outp
+     FileReader : (inp, outp : Ty) -> Plugin2 inp outp
+     XMLParser : (inp, outp : Ty) -> Plugin2 inp outp
+
+plugins2 : (Composition Plugin2 NoInput RowIter)
+plugins2 = [ InitMsg NoInput Key
+           , FileReader Key FileContents
+           , XMLParser FileContents RowIter
+           ]
 
 -- relevant discussion where #idris helped me figure the above out
   -- [10:40] <NicePerson> codygman: A composition list aka reflexive-transitive closure.

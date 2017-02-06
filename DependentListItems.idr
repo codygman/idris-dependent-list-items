@@ -35,11 +35,52 @@ data Plugin2 : (inp, outp : ty) -> Type where
      FileReader : (inp, outp : Ty) -> Plugin2 inp outp
      XMLParser : (inp, outp : Ty) -> Plugin2 inp outp
 
+-- data FileReaderConfig
+
+StringOrInt : Bool -> Type
+StringOrInt False = String
+StringOrInt True = Int
+
+record X where
+  constructor MkX
+  useFirst : Bool
+  a : Int
+  b : Bool
+  c : String
+  d : Bool
+
+DepMkX : X -> Type
+DepMkX (MkX False a b c d) = String
+DepMkX (MkX True a b c d) = ?second
+
 plugins2 : (Composition Plugin2 NoInput RowIter)
 plugins2 = [ InitMsg NoInput Key
            , FileReader Key FileContents
            , XMLParser FileContents RowIter
            ]
+
+data FilePathOrKeyMode = FilePathMode | KeyMode
+
+record FileReaderConfig where
+  constructor MkFileReaderConfig
+  fileReaderMode : FilePathOrKeyMode
+
+-- example: MkFileReaderConfig KeyMode : FileReaderConfig
+
+-- how could two different filereader configs look?
+-- FileReader KeyMode FileContents
+-- FileReader FilePathMode FileContents
+
+-- How can I make either of those two?
+-- I think I need to change up Plugin... let's try:
+
+-- Int isn't correct, just a placeholder
+data PluginConfig : Int -> Type where
+  MkPluginConfig : Int -> PluginConfig Int
+
+-- data Plugin3 : (inp, outp : ty) -> PluginConfig -> Type where
+--   MkPlugin3 : (inp, outp : Ty) -> Plugin3 inp outp
+
 
 -- relevant discussion where #idris helped me figure the above out
   -- [10:40] <NicePerson> codygman: A composition list aka reflexive-transitive closure.
